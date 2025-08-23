@@ -73,7 +73,8 @@
             </div>
         </div>
         
-        <div class="game-board">
+        <div class="game-layout">
+            <!-- Player Section (Bottom) -->
             <div class="player-section">
                 <h3 id="playerName">Player</h3>
                 <div class="hand" id="playerHand"></div>
@@ -85,14 +86,16 @@
                 </div>
             </div>
             
+            <!-- Dealer Section (Center) -->
             <div class="dealer-section">
                 <h3 id="dealerName">Dealer</h3>
                 <div class="hand" id="dealerHand"></div>
                 <div class="score" id="dealerScore">Score: 0</div>
             </div>
+            
+            <!-- AI Players (Top and Sides) -->
+            <div class="ai-players" id="aiPlayers"></div>
         </div>
-        
-        <div class="ai-players" id="aiPlayers"></div>
         
         <div class="game-status" id="gameStatus"></div>
         

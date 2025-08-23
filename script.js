@@ -174,17 +174,15 @@ function setupAIPlayers() {
             status: 'Waiting...'
         });
     } else if (gameMode === '2v2') {
-        // 2 AI players on one team
-        for (let i = 0; i < 2; i++) {
-            const aiName = getRandomAIName();
-            aiPlayers.push({
-                name: aiName,
-                hand: [],
-                score: 0,
-                isAI: true,
-                status: 'Waiting...'
-            });
-        }
+        // 1 AI player (player + AI vs dealer)
+        const aiName = getRandomAIName();
+        aiPlayers.push({
+            name: aiName,
+            hand: [],
+            score: 0,
+            isAI: true,
+            status: 'Waiting...'
+        });
     } else if (gameMode === 'FFA') {
         // 1-4 AI players (random)
         const numAI = Math.floor(Math.random() * 4) + 1;
@@ -418,6 +416,10 @@ function playAITurn() {
                 setTimeout(playDealerTurn, turnDelay);
             }
         }, turnDelay);
+    } else {
+        // Fallback: if somehow we get here, move to dealer
+        currentTurn = 'dealer';
+        setTimeout(playDealerTurn, turnDelay);
     }
 }
 
@@ -459,15 +461,15 @@ function determineRoundWinner() {
         }
     } else if (gameMode === '2v2') {
         const teamScore = playerScore + aiPlayers[0].score;
-        const dealerTeamScore = dealerScore + aiPlayers[1].score;
+        const dealerScore = calculateHandValue(dealerHand);
         
         if (teamScore > 21) {
             winner = 'dealer';
-        } else if (dealerTeamScore > 21) {
+        } else if (dealerScore > 21) {
             winner = 'player';
-        } else if (teamScore > dealerTeamScore) {
+        } else if (teamScore > dealerScore) {
             winner = 'player';
-        } else if (dealerTeamScore > teamScore) {
+        } else if (dealerScore > teamScore) {
             winner = 'dealer';
         } else {
             winner = 'tie';
@@ -683,6 +685,22 @@ function updateAIPlayersDisplay() {
     aiPlayers.forEach((ai, index) => {
         const aiPlayerElement = document.createElement('div');
         aiPlayerElement.className = `ai-player ${currentTurn === 'ai' && currentAITurn === index ? 'active' : ''}`;
+        
+        // Position AI players around the dealer in a circle-like pattern
+        const totalAI = aiPlayers.length;
+        const angle = (index / totalAI) * 2 * Math.PI - Math.PI / 2; // Start from top
+        const radius = 180; // Distance from center in pixels
+        
+        // Calculate position based on angle
+        const centerX = 300; // Center X position (half of container width)
+        const centerY = 300; // Center Y position (half of container height)
+        
+        const x = centerX + (radius * Math.cos(angle));
+        const y = centerY + (radius * Math.sin(angle));
+        
+        aiPlayerElement.style.left = `${x}px`;
+        aiPlayerElement.style.top = `${y}px`;
+        aiPlayerElement.style.transform = 'translate(-50%, -50%)';
         
         aiPlayerElement.innerHTML = `
             <h4>${ai.name}</h4>
