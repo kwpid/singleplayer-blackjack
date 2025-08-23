@@ -14,6 +14,9 @@ let playerHand = [];
 let dealerHand = [];
 let aiPlayers = [];
 let gameHistory = [];
+let currentTurn = 'player'; // 'player', 'ai', 'dealer'
+let currentAITurn = 0;
+let turnDelay = 1000; // 1 second delay between AI turns
 
 // AI Names
 const regularAINames = [
@@ -167,7 +170,8 @@ function setupAIPlayers() {
             name: aiName,
             hand: [],
             score: 0,
-            isAI: true
+            isAI: true,
+            status: 'Waiting...'
         });
     } else if (gameMode === '2v2') {
         // 2 AI players on one team
@@ -177,7 +181,8 @@ function setupAIPlayers() {
                 name: aiName,
                 hand: [],
                 score: 0,
-                isAI: true
+                isAI: true,
+                status: 'Waiting...'
             });
         }
     } else if (gameMode === 'FFA') {
@@ -189,7 +194,8 @@ function setupAIPlayers() {
                 name: aiName,
                 hand: [],
                 score: 0,
-                isAI: true
+                isAI: true,
+                status: 'Waiting...'
             });
         }
     }
@@ -244,11 +250,16 @@ function startNewRound() {
     playerHand = [];
     dealerHand = [];
     
-    // Reset AI hands
+    // Reset AI hands and status
     aiPlayers.forEach(ai => {
         ai.hand = [];
         ai.score = 0;
+        ai.status = 'Waiting...';
     });
+    
+    // Reset turn system
+    currentTurn = 'player';
+    currentAITurn = 0;
     
     // Deal initial cards
     dealInitialCards();
@@ -286,14 +297,9 @@ function updateScores() {
     const playerScore = calculateHandValue(playerHand);
     document.getElementById('playerScore').textContent = `Score: ${playerScore}`;
     
-    // Update dealer score (hide first card in 1v1 and 2v2)
-    if (gameMode === 'FFA') {
-        const dealerScore = calculateHandValue(dealerHand);
-        document.getElementById('dealerScore').textContent = `Score: ${dealerScore}`;
-    } else {
-        const visibleScore = calculateHandValue([dealerHand[1]]);
-        document.getElementById('dealerScore').textContent = `Score: ${visibleScore}`;
-    }
+    // Update dealer score (always show in turn-based system)
+    const dealerScore = calculateHandValue(dealerHand);
+    document.getElementById('dealerScore').textContent = `Score: ${dealerScore}`;
     
     // Update AI scores
     aiPlayers.forEach((ai, index) => {
@@ -334,26 +340,7 @@ function checkBlackjack(hand) {
 
 // Player actions
 function hit() {
-    if (!gameInProgress) return;
-    
-    playerHand.push(currentDeck.pop());
-    updateScores();
-    updateGameDisplay();
-    
-    if (calculateHandValue(playerHand) > 21) {
-        endRound('dealer');
-    }
-}
-
-function stand() {
-    if (!gameInProgress) return;
-    
-    gameInProgress = false;
-    playAITurn();
-}
-
-function double() {
-    if (!gameInProgress || playerHand.length !== 2) return;
+    if (!gameInProgress || currentTurn !== 'player') return;
     
     playerHand.push(currentDeck.pop());
     updateScores();
@@ -362,31 +349,94 @@ function double() {
     if (calculateHandValue(playerHand) > 21) {
         endRound('dealer');
     } else {
-        gameInProgress = false;
-        playAITurn();
+        // Player's turn is over, move to AI turn
+        currentTurn = 'ai';
+        currentAITurn = 0;
+        updateGameDisplay();
+        setTimeout(playAITurn, turnDelay);
+    }
+}
+
+function stand() {
+    if (!gameInProgress || currentTurn !== 'player') return;
+    
+    // Player's turn is over, move to AI turn
+    currentTurn = 'ai';
+    currentAITurn = 0;
+    updateGameDisplay();
+    setTimeout(playAITurn, turnDelay);
+}
+
+function double() {
+    if (!gameInProgress || currentTurn !== 'player' || playerHand.length !== 2) return;
+    
+    playerHand.push(currentDeck.pop());
+    updateScores();
+    updateGameDisplay();
+    
+    if (calculateHandValue(playerHand) > 21) {
+        endRound('dealer');
+    } else {
+        // Player's turn is over, move to AI turn
+        currentTurn = 'ai';
+        currentAITurn = 0;
+        updateGameDisplay();
+        setTimeout(playAITurn, turnDelay);
     }
 }
 
 // AI turn
 function playAITurn() {
-    // Play dealer's turn
-    while (calculateHandValue(dealerHand) < 17) {
-        dealerHand.push(currentDeck.pop());
+    if (currentAITurn < aiPlayers.length) {
+        // Play current AI player's turn
+        const currentAI = aiPlayers[currentAITurn];
+        currentAI.status = 'Thinking...';
+        updateGameDisplay();
+        
+        setTimeout(() => {
+            // AI decision making
+            while (currentAI.score < 17) {
+                currentAI.hand.push(currentDeck.pop());
+                currentAI.score = calculateHandValue(currentAI.hand);
+            }
+            
+            if (currentAI.score > 21) {
+                currentAI.status = 'Bust!';
+            } else {
+                currentAI.status = 'Stand';
+            }
+            
+            currentAITurn++;
+            updateGameDisplay();
+            
+            // Continue with next AI or move to dealer
+            if (currentAITurn < aiPlayers.length) {
+                setTimeout(playAITurn, turnDelay);
+            } else {
+                // All AI players done, dealer's turn
+                currentTurn = 'dealer';
+                setTimeout(playDealerTurn, turnDelay);
+            }
+        }, turnDelay);
     }
-    
-    // Play AI players' turns
-    aiPlayers.forEach(ai => {
-        while (ai.score < 17) {
-            ai.hand.push(currentDeck.pop());
-            ai.score = calculateHandValue(ai.hand);
-        }
-    });
-    
-    updateScores();
+}
+
+function playDealerTurn() {
+    currentTurn = 'dealer';
     updateGameDisplay();
     
-    // Determine round winner
-    determineRoundWinner();
+    setTimeout(() => {
+        // Dealer plays according to rules (hit on 16 or below, stand on 17+)
+        while (calculateHandValue(dealerHand) < 17) {
+            dealerHand.push(currentDeck.pop());
+        }
+        
+        updateScores();
+        updateGameDisplay();
+        
+        // Determine round winner
+        determineRoundWinner();
+    }, turnDelay);
 }
 
 function determineRoundWinner() {
@@ -608,37 +658,80 @@ function updateGameDisplay() {
         playerHandElement.appendChild(createCardElement(card));
     });
     
-    // Update dealer hand
+    // Update dealer hand (always show all cards in turn-based system)
     const dealerHandElement = document.getElementById('dealerHand');
     dealerHandElement.innerHTML = '';
+    dealerHand.forEach(card => {
+        dealerHandElement.appendChild(createCardElement(card));
+    });
     
-    if (gameMode === 'FFA') {
-        // Show all cards in FFA
-        dealerHand.forEach(card => {
-            dealerHandElement.appendChild(createCardElement(card));
-        });
-    } else {
-        // Hide first card in 1v1 and 2v2
-        dealerHand.forEach((card, index) => {
-            if (index === 0) {
-                dealerHandElement.appendChild(createHiddenCardElement());
-            } else {
-                dealerHandElement.appendChild(createCardElement(card));
-            }
-        });
-    }
+    // Update AI players display
+    updateAIPlayersDisplay();
     
     // Update game mode display
     document.getElementById('gameMode').textContent = gameMode;
     document.getElementById('playerElo').textContent = playerElo;
+    
+    // Update turn indicator
+    updateTurnIndicator();
+}
+
+function updateAIPlayersDisplay() {
+    const aiPlayersElement = document.getElementById('aiPlayers');
+    aiPlayersElement.innerHTML = '';
+    
+    aiPlayers.forEach((ai, index) => {
+        const aiPlayerElement = document.createElement('div');
+        aiPlayerElement.className = `ai-player ${currentTurn === 'ai' && currentAITurn === index ? 'active' : ''}`;
+        
+        aiPlayerElement.innerHTML = `
+            <h4>${ai.name}</h4>
+            <div class="hand">
+                ${ai.hand.map(card => createCardHTML(card)).join('')}
+            </div>
+            <div class="score">Score: ${ai.score}</div>
+            <div class="status">${ai.status}</div>
+        `;
+        
+        aiPlayersElement.appendChild(aiPlayerElement);
+    });
+}
+
+function createCardHTML(card) {
+    return `<div class="card ${card.isRed ? 'red' : ''}">
+        <div class="value">${card.value}</div>
+        <div class="suit">${card.suit}</div>
+    </div>`;
+}
+
+function updateTurnIndicator() {
+    const gameStatus = document.getElementById('gameStatus');
+    
+    // Remove active class from all sections
+    document.querySelector('.player-section').classList.remove('active');
+    document.querySelector('.dealer-section').classList.remove('active');
+    
+    if (currentTurn === 'player') {
+        gameStatus.textContent = 'Your turn - Choose an action';
+        gameStatus.style.color = '#2ecc71';
+        document.querySelector('.player-section').classList.add('active');
+    } else if (currentTurn === 'ai') {
+        const currentAI = aiPlayers[currentAITurn];
+        gameStatus.textContent = `${currentAI.name} is thinking...`;
+        gameStatus.style.color = '#f39c12';
+    } else if (currentTurn === 'dealer') {
+        gameStatus.textContent = 'Dealer is playing...';
+        gameStatus.style.color = '#e74c3c';
+        document.querySelector('.dealer-section').classList.add('active');
+    }
 }
 
 function updateRoundDisplay() {
     document.getElementById('roundInfo').textContent = `Round ${currentRound}/${totalRounds}`;
     
-    // Enable action buttons
+    // Enable action buttons only on player's turn
     document.querySelectorAll('#playerActions button').forEach(btn => {
-        btn.disabled = false;
+        btn.disabled = currentTurn !== 'player';
     });
     
     gameInProgress = true;
@@ -679,6 +772,8 @@ function resetGameState() {
     playerHand = [];
     dealerHand = [];
     aiPlayers = [];
+    currentTurn = 'player';
+    currentAITurn = 0;
     
     // Hide result screens
     document.getElementById('roundResults').style.display = 'none';
