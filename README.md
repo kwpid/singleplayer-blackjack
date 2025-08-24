@@ -1,136 +1,110 @@
-# Single Player Blackjack
+# Single Player Blackjack Game
 
-A feature-rich single-player blackjack game with multiple game modes, AI opponents, and an ELO ranking system.
+A modern, single-player blackjack game built with HTML, CSS, and JavaScript featuring multiple game modes and an ELO ranking system.
 
 ## Features
 
-### 🎮 Game Modes
-- **1v1**: Player vs AI - 5 rounds, best of 5
-- **2v2**: Team vs Team - 5 rounds, best of 5  
-- **FFA**: Free for All (2-5 players) - 10 rounds, highest score wins
+### Game Modes
+- **1v1**: Player vs AI - 5 rounds, highest score wins
+- **2v2**: Team vs Team - 5 rounds, team with most wins gains ELO
+- **FFA**: Free for All - Up to 5 players, 10 rounds, ranked by performance
 
-### 🏆 ELO System
-- Players start at 1,000 ELO
-- ELO changes based on performance and game mode
-- Higher ELO = longer queue times (3-20 seconds)
-- Casual mode uses single ELO across all game types
+### Gameplay
+- Standard blackjack rules (get closest to 21 without busting)
+- Multiple rounds per game
+- AI opponents with realistic usernames
+- ELO system for progression tracking
+- Queue system with realistic wait times (3-20 seconds based on ELO)
 
-### 🤖 AI Opponents
-- **Regular AI**: 70% chance (Alex, Sam, Jordan, etc.)
-- **High Ranked AI**: 30% chance (Shadow, Viper, Phoenix, etc.)
-- No prefixes or suffixes - clean usernames
-
-### 📊 Statistics & Progress
-- Comprehensive player statistics
-- Win/loss records by game mode
-- Best winning streaks
-- Overall win rate tracking
-
-### 🎨 User Interface
-- Dark mode theme with modern design
-- Responsive layout for all devices
-- Smooth animations and transitions
-- Intuitive navigation between screens
+### UI Features
+- Dark mode theme with modern gradient design
+- Responsive design for mobile and desktop
+- Smooth animations and hover effects
+- Intuitive card display and game controls
 
 ## How to Play
 
-### Basic Rules
-1. **Objective**: Get as close to 21 as possible without going over
-2. **Card Values**:
-   - 2-10: Face value
-   - J, Q, K: 10 points
-   - A: 1 or 11 (automatically optimized)
-3. **Actions**:
-   - **Hit**: Take another card
-   - **Stand**: Keep your current hand
-   - **Double**: Double your bet and take one more card
+1. **Start the Game**: Open `index.html` in your web browser
+2. **Select Mode**: Choose from Casual, Ranked (coming soon), or Tutorial
+3. **Choose Game Type**: Select 1v1, 2v2, or FFA
+4. **Queue**: Wait for matchmaking (simulated)
+5. **Play**: Use Hit to draw cards, Stand to keep your hand
+6. **Win Rounds**: Get closest to 21 without going over
+7. **Complete Game**: Play all rounds to determine final winner
 
-### Game Flow
-1. Select **Casual** from the main menu
-2. Choose your preferred game mode (1v1, 2v2, or FFA)
-3. Wait in queue (time varies by ELO)
-4. Play through multiple rounds
-5. Win rounds to increase your ELO
-6. View your progress in the Stats section
+## Game Rules
 
-### ELO Rewards
-- **1v1**: Win 10-35 ELO, Lose 5-25 ELO
-- **2v2**: Win 15-45 ELO, Lose 10-35 ELO  
-- **FFA**: 1st place = 50 ELO, 2nd = 25 ELO, 3rd = 10 ELO
+### Card Values
+- Number cards (2-10): Face value
+- Face cards (J, Q, K): 10 points
+- Ace: 1 or 11 (whichever is better)
+
+### Actions
+- **Hit**: Take another card
+- **Stand**: Keep your current hand and end your turn
+
+### Winning
+- Closest to 21 without busting wins the round
+- Most round wins determines the game winner
+- ELO gains based on final position and game mode
+
+## ELO System
+
+- **Starting ELO**: 1,000
+- **1v1**: Winner gains 25 ELO
+- **2v2**: Winning team gains 20 ELO each
+- **FFA**: 1st place (30 ELO), 2nd place (15 ELO), 3rd place (5 ELO)
+
+## AI Opponents
+
+The game features two types of AI opponents:
+- **Regular AI**: Common names like Alex, Sam, Jordan
+- **High Ranked AI**: Cool names like Shadow, Viper, Phoenix
+
+AI difficulty increases with your ELO rating.
+
+## Technical Details
+
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Storage**: Local storage for game statistics
+- **Responsive**: Mobile-first design with CSS Grid and Flexbox
+- **No Dependencies**: Pure vanilla implementation
 
 ## File Structure
 
 ```
 singleplayer-blackjack/
 ├── index.html          # Main game interface
-├── styles.css          # Dark theme styling
-├── script.js           # Game logic and AI
+├── styles.css          # Game styling and dark theme
+├── script.js           # Game logic and mechanics
 └── README.md           # This file
 ```
 
-## Getting Started
-
-1. Open `index.html` in a modern web browser
-2. No installation or dependencies required
-3. Game data is saved locally in your browser
-4. Works offline after initial load
-
 ## Browser Compatibility
 
-- Chrome 80+
-- Firefox 75+
-- Safari 13+
-- Edge 80+
+- Chrome (recommended)
+- Firefox
+- Safari
+- Edge
 
-## Game Features
+## Future Features
 
-### Menu System
-- **Casual**: Play for fun with ELO tracking
-- **Ranked**: Coming soon - competitive play
-- **Tutorial**: Learn blackjack rules
-- **Settings**: Customize game preferences
-- **Leaderboards**: Coming soon - global rankings
-- **Stats**: View your performance history
+- Ranked mode with seasonal resets
+- Inventory system for collectibles
+- Leaderboards and global rankings
+- Sound effects and music
+- Additional game modes
 
-### Queue System
-- Realistic wait times based on ELO
-- Cancel queue option
-- Animated loading spinner
-- Estimated wait time display
+## Getting Started
 
-### Game Interface
-- Clear card visualization
-- Real-time score updates
-- Round progress tracking
-- Action button management
-- Responsive game board layout
-
-## Technical Details
-
-- **Frontend**: Pure HTML/CSS/JavaScript
-- **Storage**: Local browser storage
-- **AI**: Rule-based decision making
-- **Responsive**: Mobile-first design
-- **Performance**: Optimized card rendering
-
-## Future Enhancements
-
-- [ ] Ranked mode with seasonal resets
-- [ ] Global leaderboards
-- [ ] Sound effects and music
-- [ ] Card animations
-- [ ] Tournament mode
-- [ ] Custom AI difficulty levels
-- [ ] Multiplayer support
-
-## Contributing
-
-This is a single-player project, but suggestions and feedback are welcome!
+1. Download or clone this repository
+2. Open `index.html` in your web browser
+3. Start playing immediately - no installation required!
 
 ## License
 
-Free to use and modify for personal projects.
+This project is open source and available under the MIT License.
 
 ---
 
-**Enjoy playing Single Player Blackjack!** 🃏♠️♥️♦️♣️
+Enjoy playing Blackjack! 🃏

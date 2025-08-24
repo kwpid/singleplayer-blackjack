@@ -7,211 +7,172 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Menu Screen -->
-    <div id="menuScreen" class="screen active">
-        <div class="menu-container">
-            <h1 class="game-title">BLACKJACK</h1>
-            <div class="main-buttons">
-                <button class="menu-btn primary" onclick="showGameModes('casual')">Casual</button>
-                <button class="menu-btn primary" onclick="showGameModes('ranked')" disabled>Ranked (Coming Soon)</button>
-                <button class="menu-btn primary" onclick="showTutorial()">Tutorial</button>
-            </div>
-            <div class="secondary-buttons">
-                <button class="menu-btn secondary" onclick="showSettings()">Settings</button>
-                <button class="menu-btn secondary" onclick="showLeaderboards()" disabled>Leaderboards (Coming Soon)</button>
-                <button class="menu-btn secondary" onclick="showStats()">Stats</button>
+    <div id="app">
+        <!-- Main Menu Screen -->
+        <div id="mainMenu" class="screen active">
+            <div class="menu-container">
+                <h1 class="game-title">BLACKJACK</h1>
+                <div class="main-buttons">
+                    <button class="menu-btn primary" onclick="showGameMode('casual')">Casual</button>
+                    <button class="menu-btn secondary" onclick="showComingSoon('Ranked')">Ranked (Coming Soon)</button>
+                    <button class="menu-btn secondary" onclick="showComingSoon('Inventory')">Inventory (Coming Soon)</button>
+                    <button class="menu-btn primary" onclick="showTutorial()">Tutorial</button>
+                </div>
+                <div class="secondary-buttons">
+                    <button class="menu-btn small" onclick="showSettings()">Settings</button>
+                    <button class="menu-btn small" onclick="showComingSoon('Leaderboards')">Leaderboards (Coming Soon)</button>
+                    <button class="menu-btn small" onclick="showStats()">Stats</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Game Modes Screen -->
-    <div id="gameModesScreen" class="screen">
-        <div class="modes-container">
-            <h2 id="modesTitle">Select Game Mode</h2>
-            <div class="mode-buttons">
-                <button class="mode-btn" onclick="selectGameMode('1v1')">
-                    <h3>1v1</h3>
-                    <p>Player vs AI</p>
-                    <p>5 rounds, best of 5</p>
-                </button>
-                <button class="mode-btn" onclick="selectGameMode('2v2')">
-                    <h3>2v2</h3>
-                    <p>Team vs Team</p>
-                    <p>5 rounds, best of 5</p>
-                </button>
-                <button class="mode-btn" onclick="selectGameMode('FFA')">
-                    <h3>FFA</h3>
-                    <p>Free for All (2-5 players)</p>
-                    <p>10 rounds, highest score wins</p>
-                </button>
+        <!-- Game Mode Selection Screen -->
+        <div id="gameModeScreen" class="screen">
+            <div class="menu-container">
+                <h2>Select Game Mode</h2>
+                <div class="game-modes">
+                    <button class="mode-btn" onclick="selectGameMode('1v1')">
+                        <h3>1v1</h3>
+                        <p>Player vs AI<br>5 rounds</p>
+                    </button>
+                    <button class="mode-btn" onclick="selectGameMode('2v2')">
+                        <h3>2v2</h3>
+                        <p>Team vs Team<br>5 rounds</p>
+                    </button>
+                    <button class="mode-btn" onclick="selectGameMode('ffa')">
+                        <h3>FFA</h3>
+                        <p>Free for All<br>Up to 5 players<br>10 rounds</p>
+                    </button>
+                </div>
+                <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
             </div>
-            <button class="back-btn" onclick="showMenu()">Back to Menu</button>
         </div>
-    </div>
 
-    <!-- Queue Screen -->
-    <div id="queueScreen" class="screen">
-        <div class="queue-container">
-            <h2>Searching for Game...</h2>
-            <div class="queue-animation">
-                <div class="spinner"></div>
+        <!-- Queue Screen -->
+        <div id="queueScreen" class="screen">
+            <div class="queue-container">
+                <h2>Searching for Game...</h2>
+                <div class="queue-info">
+                    <p>Game Mode: <span id="queueGameMode">-</span></p>
+                    <p>Your ELO: <span id="queueElo">-</span></p>
+                </div>
+                <div class="loading-spinner"></div>
+                <div class="queue-timer">Time: <span id="queueTime">0s</span></div>
+                <button class="cancel-btn" onclick="cancelQueue()">Cancel Queue</button>
             </div>
-            <p id="queueTime">Estimated wait time: <span id="waitTime">3-20</span> seconds</p>
-            <button class="cancel-btn" onclick="cancelQueue()">Cancel Queue</button>
         </div>
-    </div>
 
-    <!-- Game Screen -->
-    <div id="gameScreen" class="screen">
-        <div class="game-header">
-            <div class="game-info">
-                <span id="gameMode">1v1</span>
-                <span id="roundInfo">Round 1/5</span>
-            </div>
-            <div class="player-elo">
-                <span>ELO: <span id="playerElo">1000</span></span>
-            </div>
-        </div>
-        
-        <div class="game-layout">
-            <!-- Player Section (Bottom) -->
-            <div class="player-section">
-                <h3 id="playerName">Player</h3>
-                <div class="hand" id="playerHand"></div>
-                <div class="score" id="playerScore">Score: 0</div>
-                <div class="actions" id="playerActions">
-                    <button onclick="hit()">Hit</button>
-                    <button onclick="stand()">Stand</button>
-                    <button onclick="double()">Double</button>
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="game-header">
+                <div class="game-info">
+                    <span>Round: <span id="currentRound">1</span>/<span id="totalRounds">5</span></span>
+                    <span>Mode: <span id="gameModeDisplay">-</span></span>
+                </div>
+                <div class="scores">
+                    <div id="scoreDisplay"></div>
                 </div>
             </div>
             
-            <!-- Dealer Section (Center) -->
-            <div class="dealer-section">
-                <h3 id="dealerName">Dealer</h3>
-                <div class="hand" id="dealerHand"></div>
-                <div class="score" id="dealerScore">Score: 0</div>
+            <div class="game-board">
+                <div class="players-container" id="playersContainer">
+                    <!-- Players will be dynamically added here -->
+                </div>
+                
+                <div class="game-controls">
+                    <button id="hitBtn" onclick="hit()">Hit</button>
+                    <button id="standBtn" onclick="stand()">Stand</button>
+                    <button id="nextRoundBtn" onclick="nextRound()" style="display: none;">Next Round</button>
+                </div>
             </div>
-            
-            <!-- AI Players (Top and Sides) -->
-            <div class="ai-players" id="aiPlayers"></div>
         </div>
-        
-        <div class="game-status" id="gameStatus"></div>
-        
-        <div class="round-results" id="roundResults" style="display: none;">
-            <h3 id="roundWinner"></h3>
-            <button onclick="nextRound()">Next Round</button>
-        </div>
-        
-        <div class="game-results" id="gameResults" style="display: none;">
-            <h2 id="gameWinner"></h2>
-            <div id="eloChange"></div>
-            <button onclick="showMenu()">Back to Menu</button>
-        </div>
-    </div>
 
-    <!-- Tutorial Screen -->
-    <div id="tutorialScreen" class="screen">
-        <div class="tutorial-container">
-            <h2>How to Play Blackjack</h2>
-            <div class="tutorial-content">
-                <div class="tutorial-section">
-                    <h3>Objective</h3>
-                    <p>Get as close to 21 as possible without going over. Beat the dealer's hand.</p>
-                </div>
-                <div class="tutorial-section">
-                    <h3>Card Values</h3>
-                    <ul>
-                        <li>2-10: Face value</li>
-                        <li>J, Q, K: 10 points</li>
-                        <li>A: 1 or 11 (your choice)</li>
-                    </ul>
-                </div>
-                <div class="tutorial-section">
-                    <h3>Actions</h3>
-                    <ul>
-                        <li><strong>Hit:</strong> Take another card</li>
-                        <li><strong>Stand:</strong> Keep your current hand</li>
-                        <li><strong>Double:</strong> Double your bet and take one more card</li>
-                    </ul>
-                </div>
-                <div class="tutorial-section">
-                    <h3>Winning</h3>
-                    <ul>
-                        <li>Closest to 21 without going over wins</li>
-                        <li>Blackjack (A + 10) pays 3:2</li>
-                        <li>Going over 21 is a bust (automatic loss)</li>
-                    </ul>
-                </div>
-            </div>
-            <button class="back-btn" onclick="showMenu()">Back to Menu</button>
-        </div>
-    </div>
-
-    <!-- Settings Screen -->
-    <div id="settingsScreen" class="screen">
-        <div class="settings-container">
-            <h2>Settings</h2>
-            <div class="setting-item">
-                <label for="soundToggle">Sound Effects</label>
-                <input type="checkbox" id="soundToggle" checked>
-            </div>
-            <div class="setting-item">
-                <label for="musicToggle">Background Music</label>
-                <input type="checkbox" id="musicToggle">
-            </div>
-            <div class="setting-item">
-                <label for="autoPlay">Auto-play animations</label>
-                <input type="checkbox" id="autoPlay" checked>
-            </div>
-            <button class="back-btn" onclick="showMenu()">Back to Menu</button>
-        </div>
-    </div>
-
-    <!-- Stats Screen -->
-    <div id="statsScreen" class="screen">
-        <div class="stats-container">
-            <h2>Player Statistics</h2>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h3>Current ELO</h3>
-                    <p id="currentElo">1000</p>
-                </div>
-                <div class="stat-item">
-                    <h3>Games Played</h3>
-                    <p id="gamesPlayed">0</p>
-                </div>
-                <div class="stat-item">
-                    <h3>Win Rate</h3>
-                    <p id="winRate">0%</p>
-                </div>
-                <div class="stat-item">
-                    <h3>Best Streak</h3>
-                    <p id="bestStreak">0</p>
-                </div>
-            </div>
-            <div class="stats-breakdown">
-                <h3>Game Mode Breakdown</h3>
-                <div class="mode-stats">
-                    <div class="mode-stat">
-                        <h4>1v1</h4>
-                        <p>Wins: <span id="v1Wins">0</span></p>
-                        <p>Losses: <span id="v1Losses">0</span></p>
+        <!-- Tutorial Screen -->
+        <div id="tutorialScreen" class="screen">
+            <div class="tutorial-container">
+                <h2>How to Play Blackjack</h2>
+                <div class="tutorial-content">
+                    <div class="tutorial-section">
+                        <h3>Objective</h3>
+                        <p>Get as close to 21 as possible without going over. Beat the dealer/other players!</p>
                     </div>
-                    <div class="mode-stat">
-                        <h4>2v2</h4>
-                        <p>Wins: <span id="v2Wins">0</span></p>
-                        <p>Losses: <span id="v2Losses">0</span></p>
+                    <div class="tutorial-section">
+                        <h3>Card Values</h3>
+                        <ul>
+                            <li>Number cards (2-10): Face value</li>
+                            <li>Face cards (J, Q, K): 10 points</li>
+                            <li>Ace: 1 or 11 (whichever is better)</li>
+                        </ul>
                     </div>
-                    <div class="mode-stat">
-                        <h4>FFA</h4>
-                        <p>Wins: <span id="ffaWins">0</span></p>
-                        <p>Losses: <span id="ffaLosses">0</span></p>
+                    <div class="tutorial-section">
+                        <h3>Actions</h3>
+                        <ul>
+                            <li><strong>Hit:</strong> Take another card</li>
+                            <li><strong>Stand:</strong> Keep your current hand</li>
+                        </ul>
+                    </div>
+                    <div class="tutorial-section">
+                        <h3>Game Modes</h3>
+                        <ul>
+                            <li><strong>1v1:</strong> 5 rounds, highest score wins</li>
+                            <li><strong>2v2:</strong> Team battle, 5 rounds</li>
+                            <li><strong>FFA:</strong> Up to 5 players, 10 rounds</li>
+                        </ul>
                     </div>
                 </div>
+                <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
             </div>
-            <button class="back-btn" onclick="showMenu()">Back to Menu</button>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="screen">
+            <div class="settings-container">
+                <h2>Settings</h2>
+                <div class="setting-item">
+                    <label for="darkMode">Dark Mode:</label>
+                    <input type="checkbox" id="darkMode" checked onchange="toggleDarkMode()">
+                </div>
+                <div class="setting-item">
+                    <label for="soundEnabled">Sound Effects:</label>
+                    <input type="checkbox" id="soundEnabled" checked>
+                </div>
+                <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Stats Screen -->
+        <div id="statsScreen" class="screen">
+            <div class="stats-container">
+                <h2>Your Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h3>Current ELO</h3>
+                        <p id="currentElo">1000</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>Games Played</h3>
+                        <p id="gamesPlayed">0</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>Win Rate</h3>
+                        <p id="winRate">0%</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>Best Streak</h3>
+                        <p id="bestStreak">0</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Coming Soon Modal -->
+        <div id="comingSoonModal" class="modal">
+            <div class="modal-content">
+                <h3><span id="comingSoonTitle">Feature</span> Coming Soon!</h3>
+                <p>This feature is currently under development.</p>
+                <button onclick="closeModal()">Close</button>
+            </div>
         </div>
     </div>
 
