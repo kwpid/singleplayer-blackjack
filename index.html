@@ -8,29 +8,29 @@
 </head>
 <body>
     <div id="app">
-        <!-- Main Menu Screen -->
-        <div id="mainMenu" class="screen active">
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen active">
             <div class="menu-container">
                 <h1 class="game-title">BLACKJACK</h1>
-                <div class="main-buttons">
+                <div class="menu-buttons">
                     <button class="menu-btn primary" onclick="showGameMode('casual')">Casual</button>
                     <button class="menu-btn secondary" onclick="showComingSoon('Ranked')">Ranked (Coming Soon)</button>
                     <button class="menu-btn secondary" onclick="showComingSoon('Inventory')">Inventory (Coming Soon)</button>
                     <button class="menu-btn primary" onclick="showTutorial()">Tutorial</button>
                 </div>
-                <div class="secondary-buttons">
-                    <button class="menu-btn small" onclick="showSettings()">Settings</button>
-                    <button class="menu-btn small" onclick="showComingSoon('Leaderboards')">Leaderboards (Coming Soon)</button>
-                    <button class="menu-btn small" onclick="showStats()">Stats</button>
+                <div class="small-buttons">
+                    <button class="small-btn" onclick="showSettings()">Settings</button>
+                    <button class="small-btn" onclick="showComingSoon('Leaderboards')">Leaderboards (Coming Soon)</button>
+                    <button class="small-btn" onclick="showStats()">Stats</button>
                 </div>
             </div>
         </div>
 
-        <!-- Game Mode Selection Screen -->
-        <div id="gameModeScreen" class="screen">
-            <div class="menu-container">
+        <!-- Game Mode Selection -->
+        <div id="game-mode" class="screen">
+            <div class="mode-container">
                 <h2>Select Game Mode</h2>
-                <div class="game-modes">
+                <div class="mode-buttons">
                     <button class="mode-btn" onclick="selectGameMode('1v1')">
                         <h3>1v1</h3>
                         <p>Player vs AI<br>5 rounds</p>
@@ -49,75 +49,79 @@
         </div>
 
         <!-- Queue Screen -->
-        <div id="queueScreen" class="screen">
+        <div id="queue-screen" class="screen">
             <div class="queue-container">
-                <h2>Searching for Game...</h2>
-                <div class="queue-info">
-                    <p>Game Mode: <span id="queueGameMode">-</span></p>
-                    <p>Your ELO: <span id="queueElo">-</span></p>
+                <h2>Finding Game...</h2>
+                <div class="queue-animation">
+                    <div class="spinner"></div>
                 </div>
-                <div class="loading-spinner"></div>
-                <div class="queue-timer">Time: <span id="queueTime">0s</span></div>
-                <button class="cancel-btn" onclick="cancelQueue()">Cancel Queue</button>
+                <p id="queue-time">0s</p>
+                <button class="cancel-btn" onclick="cancelQueue()">Cancel</button>
             </div>
         </div>
 
         <!-- Game Screen -->
-        <div id="gameScreen" class="screen">
+        <div id="game-screen" class="screen">
             <div class="game-header">
                 <div class="game-info">
-                    <span>Round: <span id="currentRound">1</span>/<span id="totalRounds">5</span></span>
-                    <span>Mode: <span id="gameModeDisplay">-</span></span>
+                    <span id="game-mode-display"></span>
+                    <span id="round-info"></span>
                 </div>
-                <div class="scores">
-                    <div id="scoreDisplay"></div>
+                <div class="player-stats">
+                    <span>ELO: <span id="player-elo">1000</span></span>
                 </div>
             </div>
             
-            <div class="game-board">
-                <div class="players-container" id="playersContainer">
-                    <!-- Players will be dynamically added here -->
+            <div class="game-area">
+                <div id="opponents-container"></div>
+                
+                <div class="table-center">
+                    <div id="dealer-cards" class="cards-area"></div>
+                    <div class="dealer-info">
+                        <span id="dealer-name">Dealer</span>
+                        <span id="dealer-score">0</span>
+                    </div>
                 </div>
                 
-                <div class="game-controls">
-                    <button id="hitBtn" onclick="hit()">Hit</button>
-                    <button id="standBtn" onclick="stand()">Stand</button>
-                    <button id="nextRoundBtn" onclick="nextRound()" style="display: none;">Next Round</button>
+                <div class="player-area">
+                    <div class="player-info">
+                        <span id="player-name">Player</span>
+                        <span id="player-score">0</span>
+                    </div>
+                    <div id="player-cards" class="cards-area"></div>
+                    <div class="player-actions">
+                        <button id="hit-btn" onclick="hit()">Hit</button>
+                        <button id="stand-btn" onclick="stand()">Stand</button>
+                        <button id="double-btn" onclick="double()">Double</button>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="menu-btn" onclick="showMainMenu()">Main Menu</button>
             </div>
         </div>
 
         <!-- Tutorial Screen -->
-        <div id="tutorialScreen" class="screen">
+        <div id="tutorial-screen" class="screen">
             <div class="tutorial-container">
                 <h2>How to Play Blackjack</h2>
                 <div class="tutorial-content">
                     <div class="tutorial-section">
                         <h3>Objective</h3>
-                        <p>Get as close to 21 as possible without going over. Beat the dealer/other players!</p>
+                        <p>Get as close to 21 as possible without going over. Beat the dealer's hand.</p>
                     </div>
                     <div class="tutorial-section">
                         <h3>Card Values</h3>
-                        <ul>
-                            <li>Number cards (2-10): Face value</li>
-                            <li>Face cards (J, Q, K): 10 points</li>
-                            <li>Ace: 1 or 11 (whichever is better)</li>
-                        </ul>
+                        <p>Number cards (2-10) = face value<br>Face cards (J, Q, K) = 10<br>Ace = 1 or 11 (your choice)</p>
                     </div>
                     <div class="tutorial-section">
                         <h3>Actions</h3>
-                        <ul>
-                            <li><strong>Hit:</strong> Take another card</li>
-                            <li><strong>Stand:</strong> Keep your current hand</li>
-                        </ul>
+                        <p><strong>Hit:</strong> Take another card<br><strong>Stand:</strong> Keep your current hand<br><strong>Double:</strong> Double your bet and take one more card</p>
                     </div>
                     <div class="tutorial-section">
-                        <h3>Game Modes</h3>
-                        <ul>
-                            <li><strong>1v1:</strong> 5 rounds, highest score wins</li>
-                            <li><strong>2v2:</strong> Team battle, 5 rounds</li>
-                            <li><strong>FFA:</strong> Up to 5 players, 10 rounds</li>
-                        </ul>
+                        <h3>Winning</h3>
+                        <p>Beat the dealer's hand or have the dealer bust (go over 21). Blackjack (Ace + 10-value card) pays 3:2.</p>
                     </div>
                 </div>
                 <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
@@ -125,41 +129,51 @@
         </div>
 
         <!-- Settings Screen -->
-        <div id="settingsScreen" class="screen">
+        <div id="settings-screen" class="screen">
             <div class="settings-container">
                 <h2>Settings</h2>
-                <div class="setting-item">
-                    <label for="darkMode">Dark Mode:</label>
-                    <input type="checkbox" id="darkMode" checked onchange="toggleDarkMode()">
-                </div>
-                <div class="setting-item">
-                    <label for="soundEnabled">Sound Effects:</label>
-                    <input type="checkbox" id="soundEnabled" checked>
+                <div class="settings-content">
+                    <div class="setting-item">
+                        <label for="sound-toggle">Sound Effects</label>
+                        <input type="checkbox" id="sound-toggle" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label for="music-toggle">Background Music</label>
+                        <input type="checkbox" id="music-toggle">
+                    </div>
+                    <div class="setting-item">
+                        <label for="auto-play">Auto-play animations</label>
+                        <input type="checkbox" id="auto-play" checked>
+                    </div>
                 </div>
                 <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
             </div>
         </div>
 
         <!-- Stats Screen -->
-        <div id="statsScreen" class="screen">
+        <div id="stats-screen" class="screen">
             <div class="stats-container">
-                <h2>Your Statistics</h2>
-                <div class="stats-grid">
+                <h2>Player Statistics</h2>
+                <div class="stats-content">
                     <div class="stat-item">
-                        <h3>Current ELO</h3>
-                        <p id="currentElo">1000</p>
+                        <span class="stat-label">Current ELO:</span>
+                        <span class="stat-value" id="current-elo">1000</span>
                     </div>
                     <div class="stat-item">
-                        <h3>Games Played</h3>
-                        <p id="gamesPlayed">0</p>
+                        <span class="stat-label">Games Played:</span>
+                        <span class="stat-value" id="games-played">0</span>
                     </div>
                     <div class="stat-item">
-                        <h3>Win Rate</h3>
-                        <p id="winRate">0%</p>
+                        <span class="stat-label">Games Won:</span>
+                        <span class="stat-value" id="games-won">0</span>
                     </div>
                     <div class="stat-item">
-                        <h3>Best Streak</h3>
-                        <p id="bestStreak">0</p>
+                        <span class="stat-label">Win Rate:</span>
+                        <span class="stat-value" id="win-rate">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Best Hand:</span>
+                        <span class="stat-value" id="best-hand">0</span>
                     </div>
                 </div>
                 <button class="back-btn" onclick="showMainMenu()">Back to Menu</button>
@@ -167,10 +181,10 @@
         </div>
 
         <!-- Coming Soon Modal -->
-        <div id="comingSoonModal" class="modal">
+        <div id="coming-soon-modal" class="modal">
             <div class="modal-content">
-                <h3><span id="comingSoonTitle">Feature</span> Coming Soon!</h3>
-                <p>This feature is currently under development.</p>
+                <h3 id="coming-soon-title">Feature Coming Soon</h3>
+                <p id="coming-soon-text">This feature is currently under development.</p>
                 <button onclick="closeModal()">Close</button>
             </div>
         </div>
