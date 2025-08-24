@@ -285,6 +285,18 @@ body {
     font-weight: bold;
 }
 
+.turn-indicator {
+    font-size: 0.8rem;
+    margin-top: 5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
 .table-center {
     text-align: center;
     background: rgba(0, 0, 0, 0.2);

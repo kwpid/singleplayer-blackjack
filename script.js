@@ -128,8 +128,16 @@ class Player {
 
     shouldHit() {
         if (this.isAI) {
-            // Simple AI logic: hit on 16 or below, stand on 17+
-            return this.score <= 16;
+            // More strategic AI logic
+            if (this.score <= 11) return true; // Always hit on 11 or below
+            if (this.score >= 17) return false; // Always stand on 17+
+            
+            // For 12-16, be more conservative
+            if (this.score === 12) return Math.random() < 0.3; // 30% chance to hit
+            if (this.score === 13) return Math.random() < 0.4; // 40% chance to hit
+            if (this.score === 14) return Math.random() < 0.5; // 50% chance to hit
+            if (this.score === 15) return Math.random() < 0.6; // 60% chance to hit
+            if (this.score === 16) return Math.random() < 0.7; // 70% chance to hit
         }
         return false;
     }
@@ -146,6 +154,8 @@ class Game {
         this.maxRounds = mode === 'ffa' ? 10 : 5;
         this.roundResults = [];
         this.gameOver = false;
+        this.currentPlayerIndex = 0; // Track whose turn it is
+        this.roundPhase = 'player'; // 'player' or 'dealer'
         
         this.initializePlayers();
     }
@@ -196,25 +206,78 @@ class Game {
 
         // Hide dealer's second card initially
         this.dealer.hand[1].hidden = true;
+        
+        // Randomize who goes first
+        this.currentPlayerIndex = Math.floor(Math.random() * this.players.length);
+        this.roundPhase = 'player';
+        
+        // If AI goes first, start their turn
+        if (this.players[this.currentPlayerIndex].isAI) {
+            setTimeout(() => this.playAITurn(), 1000);
+        }
     }
 
     playAITurn() {
-        for (let player of this.players) {
-            if (player.isAI && !player.busted && !player.stand) {
-                while (player.shouldHit() && !player.busted) {
-                    player.addCard(this.deck.draw());
-                }
-                player.stand = true;
-            }
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        
+        if (!currentPlayer.isAI || currentPlayer.busted || currentPlayer.stand) {
+            this.nextTurn();
+            return;
         }
+        
+        // AI makes one decision: hit or stand
+        if (currentPlayer.shouldHit()) {
+            currentPlayer.addCard(this.deck.draw());
+            // AI continues if they didn't bust
+            if (!currentPlayer.busted) {
+                setTimeout(() => this.playAITurn(), 1000);
+            } else {
+                this.nextTurn();
+            }
+        } else {
+            currentPlayer.stand = true;
+            this.nextTurn();
+        }
+    }
+    
+    nextTurn() {
+        // Move to next player
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+        
+        // If we've gone through all players, move to dealer phase
+        if (this.currentPlayerIndex === 0) {
+            this.roundPhase = 'dealer';
+            this.playDealerTurn();
+        } else {
+            // Check if current player can still play
+            const currentPlayer = this.players[this.currentPlayerIndex];
+            if (currentPlayer.busted || currentPlayer.stand) {
+                this.nextTurn(); // Skip to next player
+            } else if (currentPlayer.isAI) {
+                setTimeout(() => this.playAITurn(), 1000);
+            }
+            // If it's human player's turn, wait for their action
+        }
+        
+        // Update display
+        updateGameDisplay();
     }
 
     playDealerTurn() {
         this.dealer.hand[1].hidden = false; // Reveal hidden card
         this.dealer.calculateScore();
         
-        while (this.dealer.score < 17) {
+        // Dealer plays one card at a time
+        if (this.dealer.score < 17) {
             this.dealer.addCard(this.deck.draw());
+            updateGameDisplay();
+            setTimeout(() => this.playDealerTurn(), 1000);
+        } else {
+            // Dealer is done, determine winner
+            setTimeout(() => {
+                const results = this.determineRoundWinner();
+                showRoundResults(results);
+            }, 1000);
         }
     }
 
@@ -407,6 +470,50 @@ function updateGameDisplay() {
     
     // Update opponents
     updateOpponentsDisplay();
+    
+    // Update turn indicator
+    updateTurnIndicator();
+}
+
+function updateTurnIndicator() {
+    if (!gameState.currentGame) return;
+    
+    const game = gameState.currentGame;
+    const playerArea = document.querySelector('.player-area');
+    
+    // Remove existing turn indicator
+    const existingIndicator = playerArea.querySelector('.turn-indicator');
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+    
+    // Add turn indicator for human player if it's their turn
+    if (game.currentPlayerIndex === 0 && game.roundPhase === 'player') {
+        const turnIndicator = document.createElement('div');
+        turnIndicator.className = 'turn-indicator';
+        turnIndicator.textContent = '🎯 Your Turn!';
+        turnIndicator.style.color = '#4CAF50';
+        turnIndicator.style.fontWeight = 'bold';
+        turnIndicator.style.marginTop = '10px';
+        playerArea.appendChild(turnIndicator);
+    }
+    
+    // Update dealer turn indicator
+    const dealerArea = document.querySelector('.table-center');
+    const existingDealerIndicator = dealerArea.querySelector('.turn-indicator');
+    if (existingDealerIndicator) {
+        existingDealerIndicator.remove();
+    }
+    
+    if (game.roundPhase === 'dealer') {
+        const dealerIndicator = document.createElement('div');
+        dealerIndicator.className = 'turn-indicator';
+        dealerIndicator.textContent = '🎯 Dealer\'s Turn';
+        dealerIndicator.style.color = '#ffd700';
+        dealerIndicator.style.fontWeight = 'bold';
+        dealerIndicator.style.marginTop = '10px';
+        dealerArea.appendChild(dealerIndicator);
+    }
 }
 
 function updateDealerDisplay() {
@@ -447,9 +554,12 @@ function updatePlayerDisplay() {
     const standBtn = document.getElementById('stand-btn');
     const doubleBtn = document.getElementById('double-btn');
     
-    hitBtn.disabled = player.busted || player.stand;
-    standBtn.disabled = player.busted || player.stand;
-    doubleBtn.disabled = player.busted || player.stand || player.hand.length > 2;
+    const isPlayerTurn = gameState.currentGame.currentPlayerIndex === 0 && 
+                        gameState.currentGame.roundPhase === 'player';
+    
+    hitBtn.disabled = player.busted || player.stand || !isPlayerTurn;
+    standBtn.disabled = player.busted || player.stand || !isPlayerTurn;
+    doubleBtn.disabled = player.busted || player.stand || player.hand.length > 2 || !isPlayerTurn;
 }
 
 function updateOpponentsDisplay() {
@@ -476,8 +586,24 @@ function createOpponentElement(player) {
     score.className = 'opponent-score';
     score.textContent = player.score;
     
+    // Add turn indicator
+    const turnIndicator = document.createElement('div');
+    turnIndicator.className = 'turn-indicator';
+    turnIndicator.textContent = '🎯';
+    turnIndicator.style.display = 'none';
+    
+    // Check if this is the current player's turn
+    const game = gameState.currentGame;
+    const isCurrentTurn = game.players.indexOf(player) === game.currentPlayerIndex && 
+                         game.roundPhase === 'player';
+    
+    if (isCurrentTurn) {
+        turnIndicator.style.display = 'block';
+    }
+    
     opponent.appendChild(name);
     opponent.appendChild(score);
+    opponent.appendChild(turnIndicator);
     
     return opponent;
 }
@@ -526,21 +652,8 @@ function double() {
 }
 
 function endPlayerTurn() {
-    // Play AI turns
-    gameState.currentGame.playAITurn();
-    updateGameDisplay();
-    
-    setTimeout(() => {
-        // Play dealer turn
-        gameState.currentGame.playDealerTurn();
-        updateGameDisplay();
-        
-        setTimeout(() => {
-            // Determine winner
-            const results = gameState.currentGame.determineRoundWinner();
-            showRoundResults(results);
-        }, 1000);
-    }, 1000);
+    // Move to next turn
+    gameState.currentGame.nextTurn();
 }
 
 function showRoundResults(results) {
